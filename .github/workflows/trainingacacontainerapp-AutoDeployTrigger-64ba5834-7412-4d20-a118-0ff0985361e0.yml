@@ -1,0 +1,43 @@
+name: Trigger auto deployment for trainingacacontainerapp
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/trainingacacontainerapp-AutoDeployTrigger-64ba5834-7412-4d20-a118-0ff0985361e0.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.TRAININGACACONTAINERAPP_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: trainingacaregistry.azurecr.io
+          registryUsername: ${{ secrets.TRAININGACACONTAINERAPP_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.TRAININGACACONTAINERAPP_REGISTRY_PASSWORD }}
+          containerAppName: trainingacacontainerapp
+          resourceGroup: trainingaca
+          imageToBuild: trainingacaregistry.azurecr.io/trainingacacontainerapp:${{ github.sha }}
+          
+            
+
+     
+
